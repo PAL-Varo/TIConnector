@@ -1,7 +1,23 @@
+<#
+This file defines the internal REST API configuration for supported
+TI-Connector implementations.
+
+Each connector entry contains its management port and a list of supported
+operations. Every operation specifies the relative request path, HTTP method,
+and HTTP status code expected for a successful response.
+
+The configuration is consumed by the module's internal request helpers and is
+not exported as part of the public module API.
+#>
 $script:ConnectorRequests = @{
     Secunet = @{
         Port       = 8500
         Operations = @{
+            NewTIConnectorToken                = @{
+                Path               = "rest/mgmt/ak/konten/login"
+                Method             = "Post"
+                ExpectedStatusCode = 204
+            }
             RemoveConnectorSession                = @{
                 Path               = "rest/mgmt/ak/konten/profil/logout"
                 Method             = "Delete"

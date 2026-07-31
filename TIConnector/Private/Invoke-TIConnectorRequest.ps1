@@ -41,9 +41,9 @@ function Invoke-TIConnectorRequest {
         [hashtable] $PathParameters = @{}
     )
 
-    $Token = Get-ConnectorToken -ComputerName $ComputerName -Credential $Credential
+    $token = Get-TIConnectorToken -ComputerName $ComputerName -Credential $Credential
 
-    operation = $script:ConnectorRequests.Secunet.Operations[$Request]
+    $operation = $script:ConnectorRequests.Secunet.Operations[$Request]
     $path = $operation.Path
 
     foreach ($parameter in $PathParameters.GetEnumerator()) {
@@ -51,32 +51,19 @@ function Invoke-TIConnectorRequest {
     }
 
     $url = "https://{0}:{1}/{2}" -f $ComputerName, $script:ConnectorRequests.Secunet.Port, $path
-    $method = $operation.Method
-    $expectedStatusCode = $operation.ExpectedStatusCode
 
     $headers = @{
-        "Authorization" = "Bearer $Token"
+        "Authorization" = "Bearer $token"
     }
 
-    try {
-        $response = Invoke-WebRequest `
-            -Uri $url `
-            -Method $method `
-            -Headers $headers `
-            -ContentType "application/json" `
-            -SkipCertificateCheck `
-            -ErrorAction Stop
-            
-        if ($response.StatusCode -notin $expectedStatusCode) {
-            throw "Unexpected status code: $($response.StatusCode)"
-        }
-        
-        if ([string]::IsNullOrWhiteSpace($response.Content)) {
-            return $null
-        }
-        return $response.Content | ConvertFrom-Json -Depth 10
+    $response = Invoke-TIConnectorHttp `
+        -Uri $url  `
+        -Method $operation.Method  `
+        -Headers $headers  `
+        -ExpectedStatusCode $operation.ExpectedStatusCode
+
+    if ([string]::IsNullOrWhiteSpace($response.Content)) {
+        return $null
     }
-    catch {
-        throw "Connector request failed: $($_.Exception.Message)"
-    }
+    return $response.Content | ConvertFrom-Json -Depth 10
 }
