@@ -13,10 +13,10 @@
     PSCredential object containing the username and password to test.
 
 .EXAMPLE
-    Test-TIConnectorCredential -ComputerName "konnektor.local" -Credential $cred
+    Test-TIConnectorAuthentication -ComputerName "konnektor.local" -Credential $cred
     Returns $true if authentication succeeds.
 #>
-function Test-TIConnectorCredential {
+function Test-TIConnectorAuthentication {
     [CmdletBinding()]
     [OutputType([bool])]
     param (
@@ -33,7 +33,7 @@ function Test-TIConnectorCredential {
             return [bool](-not [string]::IsNullOrWhiteSpace($token))
         }
         catch {
-            Write-Verbose "Credential test failed for '$ComputerName': $($_.Exception.Message)"
+            Write-Verbose "Authentication failed for '$ComputerName': $($_.Exception.Message)"
             return $false
         }
     }
