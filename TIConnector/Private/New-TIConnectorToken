@@ -1,0 +1,51 @@
+function New-TIConnectorToken {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $ComputerName,
+        [Parameter(Mandatory = $true)]
+        [PSCredential] $Credential,
+        [Parameter(Mandatory = $true)]
+        [string] $Port,
+        [Parameter(Mandatory = $true)]
+        [string] $Path
+    )
+    
+    $url = "https://{0}:{1}/{2}" -f $ComputerName, $Port, $Path
+
+    $payload = @{
+        username = $Credential.UserName
+        password = $Credential.GetNetworkCredential().Password
+    }
+
+    $jsonPayload = $payload | ConvertTo-Json
+
+    try {
+        $response = Invoke-WebRequest `
+            -Uri $url `
+            -Method Post `
+            -Body $jsonPayload `
+            -ContentType "application/json" `
+            -SkipCertificateCheck `
+            -ErrorAction Stop
+        
+        $authHeader = $response.Headers['Authorization']
+
+        if ([string]::IsNullOrEmpty($authHeader)) {
+            throw "Authorization header does not contain an authentication token."
+        }
+
+        $token = ($authHeader -split ' ')[1]
+
+        if ([string]::IsNullOrEmpty($token)) {
+            throw "Invalid Authorization header format."
+        }
+
+        return $token
+    }
+    catch {
+        throw "Connector authentication failed: $($_.Exception.Message)"
+    }
+
+}
