@@ -1,0 +1,9 @@
+*.log
+*.xml
+*.clixml
+*.tmp
+.vscode/
+*.nupkg
+*credential*
+*secret*
+config.json
