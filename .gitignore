@@ -4,6 +4,8 @@
 *.tmp
 .vscode/
 *.nupkg
-*credential*
+*credential*.log
+*credential*.json
+*credential*.xml
 *secret*
 config.json
