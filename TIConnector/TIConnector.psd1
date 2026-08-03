@@ -32,7 +32,8 @@ PowerShellVersion = '5.1'
 
 # Functions to export from this module, for best performance, do not use wildcards and do not list private functions.
 FunctionsToExport = @(
-    'Test-TIConnectorAuthentication'
+    'Test-TIConnectorAuthentication',
+    'Get-TIConnectorStatus'
 )
 
 # Cmdlets to export from this module

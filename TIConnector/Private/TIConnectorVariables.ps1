@@ -1,3 +1,6 @@
+# In-Memory Cache for active connector session tokens
+$script:ConnectorSessions = @{}
+
 <#
 This file defines the internal REST API configuration for supported
 TI-Connector implementations.
