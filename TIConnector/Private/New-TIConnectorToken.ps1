@@ -56,7 +56,11 @@ function New-TIConnectorToken {
         password = $Credential.GetNetworkCredential().Password
     } | ConvertTo-Json
 
-    $response = Invoke-TIConnectorHttp -Uri $url -Method $operation.Method -Body $payload
+    $response = Invoke-TIConnectorHttp `
+        -Uri $url `
+        -Method $operation.Method `
+        -Body $payload `
+        -ExpectedStatusCode $operation.ExpectedStatusCode
 
     $authHeader = $response.Headers['Authorization']
     if ([string]::IsNullOrEmpty($authHeader)) {

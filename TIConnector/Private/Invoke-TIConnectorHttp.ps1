@@ -52,12 +52,12 @@ function Invoke-TIConnectorHttp {
 
     try {
         $params = @{
-            Uri                 = $Uri
-            Method              = $Method
-            Headers             = $Headers
-            ContentType         = "application/json"
+            Uri                  = $Uri
+            Method               = $Method
+            Headers              = $Headers
+            ContentType          = "application/json"
             SkipCertificateCheck = $true
-            ErrorAction         = "Stop"
+            ErrorAction          = "Stop"
         }
         if ($Body) { $params.Body = $Body }
 
