@@ -30,16 +30,22 @@ function Invoke-TIConnectorRequest {
         [hashtable] $PathParameters = @{}
     )
 
+    $vendor = Get-TIConnectorVendor -ComputerName $ComputerName
+    $requestConfig = $script:ConnectorRequests[$Request]
+    if ($requestConfig.Vendor -and $requestConfig.Vendor -ne $vendor) {
+        throw "Request '$Request' is only supported for vendor '$($requestConfig.Vendor)', but connector '$ComputerName' is '$vendor'."
+    }
+
     $token = Get-TIConnectorToken -ComputerName $ComputerName -Credential $Credential
 
-    $operation = $script:ConnectorRequests.Secunet.Operations[$Request]
+    $operation = $script:ConnectorRequests[$vendor].Operations[$Request]
     $path = $operation.Path
 
     foreach ($parameter in $PathParameters.GetEnumerator()) {
         $path = $path.Replace("{$($parameter.Key)}", [uri]::EscapeDataString([string]$parameter.Value))
     }
 
-    $url = "https://{0}:{1}/{2}" -f $ComputerName, $script:ConnectorRequests.Secunet.Port, $path
+    $url = "https://{0}:{1}/{2}" -f $ComputerName, $script:ConnectorRequests[$vendor].Port, $path
 
     $headers = @{
         "Authorization" = "Bearer $token"

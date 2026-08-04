@@ -46,10 +46,24 @@ function New-TIConnectorToken {
         [PSCredential] $Credential
     )
 
-    $request = "NewTIConnectorToken"
-    $operation = $script:ConnectorRequests.Secunet.Operations[$request]
+    $vendor = Get-TIConnectorVendor -ComputerName $ComputerName
+    
+    if (-not $vendor) {
+        throw "Failed to resolve connector vendor for '$ComputerName'."
+    }
 
-    $url = "https://{0}:{1}/{2}" -f $ComputerName, $script:ConnectorRequests.Secunet.Port, $operation.Path
+    if (-not $script:ConnectorRequests.ContainsKey($vendor)) {
+        throw "Vendor '$vendor' (connector '$ComputerName') is currently not supported in ConnectorRequests configuration."
+    }
+
+    if (-not $script:ConnectorRequests[$vendor].Operations.ContainsKey($Request)) {
+        throw "Operation '$Request' is not defined for vendor '$vendor'."
+    }
+
+    $request = "NewTIConnectorToken"
+    $operation = $script:ConnectorRequests[$vendor].Operations[$request]
+
+    $url = "https://{0}:{1}/{2}" -f $ComputerName, $script:ConnectorRequests[$vendor].Port, $operation.Path
     
     $payload = @{
         username = $Credential.UserName

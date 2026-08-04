@@ -1,6 +1,9 @@
 # In-Memory Cache for active connector session tokens
 $script:ConnectorSessions = @{}
 
+# In-Memory Cache for resolved vendors
+$script:TIConnectorVendorCache = @{}
+
 <#
 This file defines the internal REST API configuration for supported
 TI-Connector implementations.
@@ -13,7 +16,7 @@ The configuration is consumed by the module's internal request helpers and is
 not exported as part of the public module API.
 #>
 $script:ConnectorRequests = @{
-    Secunet = @{
+    SECUN = @{
         Port       = 8500
         Operations = @{
             NewTIConnectorToken                = @{
