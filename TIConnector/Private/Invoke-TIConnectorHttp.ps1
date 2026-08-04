@@ -43,8 +43,10 @@ response status code is not included in ExpectedStatusCode.
 function Invoke-TIConnectorHttp {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory)] [string] $Uri,
-        [Parameter(Mandatory)] [string] $Method,
+        [Parameter(Mandatory)]
+        [string] $Uri,
+        [Parameter(Mandatory)]
+        [string] $Method,
         [hashtable] $Headers = @{},
         [string] $Body,
         [int[]] $ExpectedStatusCode = @(200)

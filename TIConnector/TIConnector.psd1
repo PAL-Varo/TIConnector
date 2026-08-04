@@ -41,7 +41,9 @@ FunctionsToExport = @(
     'Disable-TIConnectorCardTerminal',
     'Connect-TIConnectorCardTerminal',
     'Remove-TIConnectorCardTerminalAssignment',
-    'Remove-TIConnectorCardTerminal'
+    'Remove-TIConnectorCardTerminal',
+    'Get-TIConnectorContext',
+    'Export-TIConnectorContext'
 )
 
 # Cmdlets to export from this module
