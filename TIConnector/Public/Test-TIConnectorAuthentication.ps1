@@ -22,7 +22,6 @@ function Test-TIConnectorAuthentication {
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [string] $ComputerName,
-
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [PSCredential] $Credential
     )
