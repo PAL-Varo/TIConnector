@@ -26,17 +26,6 @@ function Invoke-TIConnectorRequest {
         [Parameter(Mandatory = $true)]
         [PSCredential] $Credential,
         [Parameter(Mandatory = $true)]
-        [ValidateSet("RemoveConnectorSession",
-            "GetConnectorStatus",
-            "RestartConnector",
-            "GetConnectorCardTerminal",
-            "GetConnectorCardTerminals",
-            "EnableConnectorCardTerminal",
-            "EnableConnectorCardTerminalConnection",
-            "DisableConnectorCardTerminal",
-            "RemoveConnectorCardTerminalAssignment",
-            "RemoveConnectorCardTerminal",
-            "GetConnectorContext")]
         [string] $Request,
         [hashtable] $PathParameters = @{}
     )

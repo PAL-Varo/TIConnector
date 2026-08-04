@@ -35,7 +35,13 @@ FunctionsToExport = @(
     'Test-TIConnectorAuthentication',
     'Get-TIConnectorStatus',
     'Wait-TIConnectorOnline',
-    'Restart-TIConnector'
+    'Restart-TIConnector',
+    'Get-TIConnectorCardTerminal',
+    'Enable-TIConnectorCardTerminal',
+    'Disable-TIConnectorCardTerminal',
+    'Connect-TIConnectorCardTerminal',
+    'Remove-TIConnectorCardTerminalAssignment',
+    'Remove-TIConnectorCardTerminal'
 )
 
 # Cmdlets to export from this module
