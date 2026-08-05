@@ -43,7 +43,8 @@ FunctionsToExport = @(
     'Remove-TIConnectorCardTerminalAssignment',
     'Remove-TIConnectorCardTerminal',
     'Get-TIConnectorContext',
-    'Export-TIConnectorContext'
+    'Export-TIConnectorContext',
+    'ConvertTo-TIConnectorContextCsv'
 )
 
 # Cmdlets to export from this module
