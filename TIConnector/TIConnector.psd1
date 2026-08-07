@@ -10,7 +10,7 @@ RootModule = 'TIConnector.psm1'
 ModuleVersion = '1.0.0'
 
 # Supported PSEditions
-CompatiblePSEditions = @('Desktop', 'Core')
+CompatiblePSEditions = @('Core')
 
 # ID used to uniquely identify this module
 GUID = 'e4f61575-3375-4d97-8194-dc59900e0a0d'
@@ -28,7 +28,7 @@ Copyright = '(c) 2026 Patrick Lehmann. All rights reserved.'
 Description = 'PowerShell module to manage TI Connectors via REST API.'
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '5.1'
+PowerShellVersion = '7.0'
 
 # Functions to export from this module, for best performance, do not use wildcards and do not list private functions.
 FunctionsToExport = @(
