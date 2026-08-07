@@ -11,32 +11,73 @@ function Get-TIConnectorVendor {
         return $script:TIConnectorVendorCache[$key]
     }
 
+    $vendor = $null
+
+    # Step 1: Attempt vendor detection via connector.sds (HTTP)
     try {
         $sdsUrl = "http://$ComputerName/connector.sds"
         Write-Verbose "Fetching product information from $sdsUrl"
         
-        $response = Invoke-RestMethod -Uri $sdsUrl -Method Get -TimeoutSec 5 -ErrorAction Stop
+        $response = Invoke-RestMethod -Uri $sdsUrl -Method Get -TimeoutSec 3 -ErrorAction Stop
         [xml]$sdsXml = $response
 
         $vendorNode = $sdsXml.SelectSingleNode("//*[local-name()='ProductVendorID']")
         
-        if (-not $vendorNode -or [string]::IsNullOrWhitespace($vendorNode.InnerText)) {
-            throw "ProductVendorID missing or empty in connector.sds response from $ComputerName."
+        if ($vendorNode -and -not [string]::IsNullOrWhitespace($vendorNode.InnerText)) {
+            $vendor = $vendorNode.InnerText.Trim().ToUpper()
+            Write-Verbose "Resolved vendor '$vendor' via connector.sds for '$ComputerName'."
         }
-
-        $vendor = $vendorNode.InnerText.Trim().ToUpper()
-
-        $script:TIConnectorVendorCache[$key] = $vendor
-        
-        return $vendor
     }
     catch {
-        $PSCmdlet.WriteError((New-Object System.Management.Automation.ErrorRecord(
-            [System.Exception]::new("Failed to determine connector vendor for '$ComputerName' via connector.sds: $_"),
-            "VendorResolutionFailed",
-            [System.Management.Automation.ErrorCategory]::ResourceUnavailable,
-            $ComputerName
-        )))
-        return $null
+        Write-Verbose "Failed to fetch connector.sds via HTTP from '$ComputerName': $_"
     }
+
+    # Step 2: Fallback to TCP port heuristic if SDS retrieval failed
+    if (-not $vendor) {
+        Write-Verbose "Attempting vendor detection via TCP port heuristics for '$ComputerName'..."
+
+        # Lightweight .NET TCP socket test helper
+        $testPort = {
+            param([string]$Target, [int]$Port, [int]$TimeoutMs = 1000)
+            $client = [System.Net.Sockets.TcpClient]::new()
+            try {
+                $async = $client.BeginConnect($Target, $Port, $null, $null)
+                if ($async.AsyncWaitHandle.WaitOne($TimeoutMs, $false)) {
+                    $client.EndConnect($async)
+                    $client.Close()
+                    return $true
+                }
+                $client.Close()
+                return $false
+            }
+            catch {
+                return $false
+            }
+        }
+
+        # Check configured vendor ports in $script:ConnectorRequests
+        foreach ($vendorKey in $script:ConnectorRequests.Keys) {
+            $configuredPort = $script:ConnectorRequests[$vendorKey].Port
+            if ($configuredPort -and (& $testPort -Target $ComputerName -Port $configuredPort)) {
+                $vendor = $vendorKey
+                Write-Verbose "Detected vendor '$vendor' via open port $configuredPort on '$ComputerName'."
+                break
+            }
+        }
+    }
+
+    # Step 3: Cache result or write error record
+    if ($vendor) {
+        $script:TIConnectorVendorCache[$key] = $vendor
+        return $vendor
+    }
+
+    $PSCmdlet.WriteError((New-Object System.Management.Automation.ErrorRecord(
+        [System.Exception]::new("Failed to determine connector vendor for '$ComputerName' (connector.sds unreachable and port probes failed)."),
+        "VendorResolutionFailed",
+        [System.Management.Automation.ErrorCategory]::ResourceUnavailable,
+        $ComputerName
+    )))
+
+    return $null
 }
