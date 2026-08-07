@@ -1,3 +1,24 @@
+<#
+.SYNOPSIS
+    Resolves the vendor of a target TI-Connector.
+
+.DESCRIPTION
+    Determines the vendor ID (e.g., SECUN, KOCOC) of a given TI-Connector by fetching its 
+    connector.sds manifest over HTTP. If HTTP access is unreachable or hardened/disabled, 
+    it falls back to a TCP port heuristic probe against known vendor ports configured 
+    in $script:ConnectorRequests.
+    
+    Resolved vendors are stored in memory ($script:TIConnectorVendorCache) to prevent 
+    redundant network lookups on subsequent execution.
+
+.PARAMETER ComputerName
+    FQDN or IP address of the target TI-Connector. Supports pipeline input.
+
+.EXAMPLE
+    Get-TIConnectorVendor -ComputerName "192.168.1.100"
+
+    Resolves and returns the vendor string for the connector at 192.168.1.100.
+#>
 function Get-TIConnectorVendor {
     [CmdletBinding()]
     param (
