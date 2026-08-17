@@ -57,8 +57,8 @@ function New-TIConnectorToken {
         throw "Vendor '$vendor' (connector '$ComputerName') is currently not supported in ConnectorRequests configuration."
     }
 
-    if (-not $script:ConnectorRequests[$vendor].Operations.ContainsKey($Request)) {
-        throw "Operation '$Request' is not defined for vendor '$vendor'."
+    if (-not $script:ConnectorRequests[$vendor].Operations.ContainsKey($request)) {
+        throw "Operation '$request' is not defined for vendor '$vendor'."
     }
 
     $operation = $script:ConnectorRequests[$vendor].Operations[$request]
