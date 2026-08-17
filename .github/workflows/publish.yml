@@ -1,0 +1,29 @@
+name: Publish to PowerShell Gallery
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    name: Publish Module
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Publish Module to PSGallery
+        shell: pwsh
+        env:
+          PSGALLERY_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          # Ensure Microsoft.PowerShell.PSResourceGet is installed
+          if (-not (Get-Module -ListAvailable -Name Microsoft.PowerShell.PSResourceGet)) {
+              Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -Scope CurrentUser
+          }
+
+          # Publish module folder directly using modern PSResourceGet
+          Publish-PSResource -Path "./TIConnector" -ApiKey $env:PSGALLERY_KEY -Repository PSGallery
