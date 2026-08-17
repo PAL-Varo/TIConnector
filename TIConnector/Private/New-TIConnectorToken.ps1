@@ -45,6 +45,7 @@ function New-TIConnectorToken {
         [Parameter(Mandatory = $true)]
         [PSCredential] $Credential
     )
+    $request = "NewTIConnectorToken"
 
     $vendor = Get-TIConnectorVendor -ComputerName $ComputerName
     
@@ -60,7 +61,6 @@ function New-TIConnectorToken {
         throw "Operation '$Request' is not defined for vendor '$vendor'."
     }
 
-    $request = "NewTIConnectorToken"
     $operation = $script:ConnectorRequests[$vendor].Operations[$request]
 
     $url = "https://{0}:{1}/{2}" -f $ComputerName, $script:ConnectorRequests[$vendor].Port, $operation.Path
