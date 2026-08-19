@@ -58,8 +58,9 @@ function Get-TIConnectorCardTerminal {
             Invoke-TIConnectorRequest -ComputerName $ComputerName -Credential $Credential -Request GetConnectorCardTerminals
         }
 
-        # Decorate each terminal object with connection context
+        # Decorate each terminal object with formatted time and connection context
         foreach ($terminal in $cardTerminals) {
+            $terminal | Add-Member -MemberType NoteProperty -Name "expirationAuthCertificateDate" -Value ([DateTimeOffset]::FromUnixTimeMilliseconds($terminal.expirationAuthCertificate).ToLocalTime().DateTime) -Force
             $terminal | Add-Member -MemberType NoteProperty -Name "ComputerName" -Value $ComputerName -Force
             $terminal | Add-Member -MemberType NoteProperty -Name "Credential" -Value $Credential -Force
         }
