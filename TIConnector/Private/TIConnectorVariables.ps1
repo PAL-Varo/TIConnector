@@ -19,7 +19,7 @@ $script:ConnectorRequests = @{
     SECUN = @{
         Port       = 8500
         Operations = @{
-            NewTIConnectorToken                = @{
+            NewTIConnectorToken                   = @{
                 Path               = "rest/mgmt/ak/konten/login"
                 Method             = "Post"
                 ExpectedStatusCode = 204
@@ -76,6 +76,16 @@ $script:ConnectorRequests = @{
             }
             GetConnectorContext                   = @{
                 Path               = "rest/mgmt/ak/info"
+                Method             = "Get"
+                ExpectedStatusCode = 200
+            }
+            GetConnectorCards                     = @{
+                Path               = "rest/mgmt/ak/dienste/karten"
+                Method             = "Get"
+                ExpectedStatusCode = 200
+            }
+            GetConnectorCard                      = @{
+                Path               = "rest/mgmt/ak/dienste/karten/{CardHandle}"
                 Method             = "Get"
                 ExpectedStatusCode = 200
             }
