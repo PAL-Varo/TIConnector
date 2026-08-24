@@ -33,9 +33,8 @@ function Get-TIConnectorContext {
         if ($null -ne $connectorContext) {
             $connectorContext | Add-Member -MemberType NoteProperty -Name "ComputerName" -Value $ComputerName -Force
             $connectorContext | Add-Member -MemberType NoteProperty -Name "Credential" -Value $Credential -Force
-            $connectorContext.PSObject.TypeNames.Insert(0, 'TIConnector.Context')
 
-            Write-Output $connectorContext
+            return $connectorContext
         }
     }
 }
