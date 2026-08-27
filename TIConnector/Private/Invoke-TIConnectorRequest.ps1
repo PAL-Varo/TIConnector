@@ -27,7 +27,8 @@ function Invoke-TIConnectorRequest {
         [PSCredential] $Credential,
         [Parameter(Mandatory = $true)]
         [string] $Request,
-        [hashtable] $PathParameters = @{}
+        [hashtable] $PathParameters = @{},
+        [string]$Body = $null
     )
 
     $vendor = Get-TIConnectorVendor -ComputerName $ComputerName
@@ -55,6 +56,7 @@ function Invoke-TIConnectorRequest {
         -Uri $url  `
         -Method $operation.Method  `
         -Headers $headers  `
+        -Body $Body `
         -ExpectedStatusCode $operation.ExpectedStatusCode
 
     if ([string]::IsNullOrWhiteSpace($response.Content)) {

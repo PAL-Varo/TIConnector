@@ -89,6 +89,16 @@ $script:ConnectorRequests = @{
                 Method             = "Get"
                 ExpectedStatusCode = 200
             }
+            GetConnectorLogSetting                = @{
+                Path               = "rest/mgmt/nk/protokoll/einstellungen"
+                Method             = "Get"
+                ExpectedStatusCode = 200
+            }
+            SetConnectorLogSetting                = @{
+                Path               = "rest/mgmt/nk/protokoll/einstellungen?strict=true"
+                Method             = "Put"
+                ExpectedStatusCode = 200
+            }
         }
     }
 }
