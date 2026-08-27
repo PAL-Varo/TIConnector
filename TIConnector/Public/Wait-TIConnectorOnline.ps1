@@ -27,7 +27,7 @@ function Wait-TIConnectorOnline {
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [string] $ComputerName,
         [Parameter(Mandatory = $true)]
-        [int] $Port = $script:ConnectorRequests.Secunet.Port,
+        [int] $Port,
         [switch] $RestartTriggered,
         [int] $TimeoutSeconds = 600
     )
