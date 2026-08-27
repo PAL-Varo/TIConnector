@@ -37,12 +37,18 @@ function Restart-TIConnector {
     process {
         if ($PSCmdlet.ShouldProcess($ComputerName, "Restart TI-Connector")) {
             Write-Verbose "Triggering restart on connector '$ComputerName'..."
+
+            $vendor = Get-TIConnectorVendor -ComputerName $ComputerName
+            $port = $script:ConnectorRequests[$vendor].Port
+
+            Write-Verbose $vendor
+            Write-Verbose $port
             
             Invoke-TIConnectorRequest -ComputerName $ComputerName -Credential $Credential -Request RestartConnector | Out-Null
 
             if ($Wait) {
                 Write-Verbose "Waiting for connector '$ComputerName' to complete restart..."
-                Wait-TIConnectorOnline -ComputerName $ComputerName -RestartTriggered -TimeoutSeconds $TimeoutSeconds
+                Wait-TIConnectorOnline -ComputerName $ComputerName -RestartTriggered -TimeoutSeconds $TimeoutSeconds -Port $port
             }
         }
     }
