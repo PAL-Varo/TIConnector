@@ -16,7 +16,7 @@ function ConvertTo-TIConnectorContextCsv {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-        [psobject]$Context
+        [psobject] $Context
     )
 
     process {

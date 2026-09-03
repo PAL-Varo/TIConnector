@@ -21,6 +21,9 @@
     One or more card terminal labels/names to filter for.
     Aliases: CardTerminalName, Label.
 
+.PARAMETER Disconnected
+    Retrieves only disconnected card terminals.
+
 .EXAMPLE
     Get-TIConnectorCardTerminal -ComputerName "192.168.1.100" -Credential $cred
     Retrieves all card terminals connected to the specified connector.
@@ -33,15 +36,16 @@ function Get-TIConnectorCardTerminal {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
-        [string]$ComputerName,
+        [string] $ComputerName,
         [Parameter(Mandatory = $true, Position = 1, ValueFromPipelineByPropertyName = $true)]
-        [PSCredential]$Credential,
+        [PSCredential] $Credential,
         [Parameter(Position = 2, ValueFromPipelineByPropertyName = $true)]
         [Alias("CardTerminalId", "ctId")]
-        [string[]]$Id,
+        [string[]] $Id,
         [Parameter(Position = 3, ValueFromPipelineByPropertyName = $true)]
         [Alias("CardTerminalName", "Label")]
-        [string[]]$Name
+        [string[]]$Name,
+        [switch] $Disconnected
     )
 
     process {
@@ -60,9 +64,26 @@ function Get-TIConnectorCardTerminal {
 
         # Decorate each terminal object with formatted time and connection context
         foreach ($terminal in $cardTerminals) {
+            $status = if ($terminal.Correlation -eq "Aktiv") {
+                if ($terminal.Connected) {
+                    "Connected"
+                }
+                else {
+                    "Disconnected"
+                }
+            }
+            else {
+                "Inactive"
+            }
+
+            $terminal | Add-Member -MemberType NoteProperty -Name "Status" -Value $status -Force
             $terminal | Add-Member -MemberType NoteProperty -Name "expirationAuthCertificateDate" -Value ([DateTimeOffset]::FromUnixTimeMilliseconds($terminal.expirationAuthCertificate).ToLocalTime().DateTime) -Force
             $terminal | Add-Member -MemberType NoteProperty -Name "ComputerName" -Value $ComputerName -Force
             $terminal | Add-Member -MemberType NoteProperty -Name "Credential" -Value $Credential -Force
+        }
+
+        if ($Disconnected){
+            $cardTerminals = $cardTerminals | Where-Object { $_.Status -eq "Disconnected" }
         }
 
         return $cardTerminals

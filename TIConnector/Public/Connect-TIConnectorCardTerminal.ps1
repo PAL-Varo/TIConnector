@@ -31,15 +31,15 @@ function Connect-TIConnectorCardTerminal {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
-        [string]$ComputerName,
+        [string] $ComputerName,
         [Parameter(Mandatory = $true, Position = 1, ValueFromPipelineByPropertyName = $true)]
-        [PSCredential]$Credential,
+        [PSCredential] $Credential,
         [Parameter(Position = 2, ValueFromPipelineByPropertyName = $true)]
         [Alias("CardTerminalId", "ctId")]
-        [string[]]$Id,
+        [string[]] $Id,
         [Parameter(Position = 3, ValueFromPipelineByPropertyName = $true)]
         [Alias("CardTerminalName", "Label")]
-        [string[]]$Name
+        [string[]] $Name
     )
 
     process {
