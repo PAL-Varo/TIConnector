@@ -7,7 +7,7 @@
 RootModule = 'TIConnector.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.3.2'
+ModuleVersion = '1.4.0'
 
 # Supported PSEditions
 CompatiblePSEditions = @('Core')
@@ -37,6 +37,7 @@ FunctionsToExport = @(
     'Wait-TIConnectorOnline',
     'Restart-TIConnector',
     'Get-TIConnectorCardTerminal',
+    'Set-TIConnectorCardTerminal',
     'Enable-TIConnectorCardTerminal',
     'Disable-TIConnectorCardTerminal',
     'Connect-TIConnectorCardTerminal',

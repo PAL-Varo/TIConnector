@@ -44,6 +44,11 @@ $script:ConnectorRequests = @{
                 Method             = "Get"
                 ExpectedStatusCode = 200
             }
+            SetConnectorCardTerminal              = @{
+                Path               = "rest/mgmt/ak/dienste/kartenterminals/{CardTerminalID}/bearbeiten/statisch"
+                Method             = "Put"
+                ExpectedStatusCode = 200
+            }
             GetConnectorCardTerminals             = @{
                 Path               = "rest/mgmt/ak/dienste/kartenterminals"
                 Method             = "Get"

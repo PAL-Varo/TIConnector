@@ -48,7 +48,7 @@
     log retention period and severity.
 #>
 function Set-TIConnectorLogSetting {
-    [CmdletBinding(DefaultParameterSetName = 'Direct')]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High', DefaultParameterSetName = 'Direct')]
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [string] $ComputerName,
@@ -65,7 +65,9 @@ function Set-TIConnectorLogSetting {
         [string] $Severity,
         [Parameter()]
         [ValidateSet('ENABLED', 'DISABLED')]
-        [string] $LogSuccessfulCryptoOps
+        [string] $LogSuccessfulCryptoOps,
+        [Parameter()]
+        [switch] $PassThru
     )
 
     process {
@@ -102,6 +104,20 @@ function Set-TIConnectorLogSetting {
 
         $jsonBody = $payload | ConvertTo-Json -Depth 10
 
-        Invoke-TIConnectorRequest -ComputerName $ComputerName -Credential $Credential -Request SetConnectorLogSetting -Body $jsonBody
+        if ($PSCmdlet.ShouldProcess($ComputerName, "Set log settings")) {
+            try {
+                $response = Invoke-TIConnectorRequest -ComputerName $ComputerName -Credential $Credential -Request SetConnectorLogSetting -Body $jsonBody
+            
+                if ($PassThru) {
+                    if ($response.PSObject.Properties['data']) {
+                        return $response.data
+                    }
+                    return $response
+                }
+            }
+            catch {
+                $PSCmdlet.WriteError($_)
+            }
+        }
     }
 }
