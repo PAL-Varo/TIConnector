@@ -104,6 +104,16 @@ $script:ConnectorRequests = @{
                 Method             = "Put"
                 ExpectedStatusCode = 200
             }
+            GetConnectorVPNSetting                = @{
+                Path               = "rest/mgmt/nk/netzwerk/vpn/einstellungen"
+                Method             = "Get"
+                ExpectedStatusCode = 200
+            }
+            SetConnectorVPNSetting                = @{
+                Path               = "rest/mgmt/nk/netzwerk/vpn/einstellungen?strict=true"
+                Method             = "Put"
+                ExpectedStatusCode = 200
+            }
         }
     }
 }
