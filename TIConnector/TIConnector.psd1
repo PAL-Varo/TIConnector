@@ -7,7 +7,7 @@
 RootModule = 'TIConnector.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.5.0'
+ModuleVersion = '1.6.0'
 
 # Supported PSEditions
 CompatiblePSEditions = @('Core')
@@ -54,7 +54,17 @@ FunctionsToExport = @(
     'Get-TIConnectorLogSetting',
     'Set-TIConnectorLogSetting',
     'Get-TIConnectorVPNSetting',
-    'Set-TIConnectorVPNSetting'
+    'Set-TIConnectorVPNSetting',
+    'Reset-TIConnectorUpdateInfo',
+    'Invoke-TIConnectorUpdateCheck',
+    'Get-TIConnectorUpdateSetting',
+    'Set-TIConnectorUpdateSetting',
+    'Get-TIConnectorUpdate',
+    'Get-TIConnectorCardTerminalUpdate',
+    'Add-TIConnectorCardTerminalUpdate',
+    'Add-TIConnectorCardTerminalFirmware',
+    'Add-TIConnectorUpdate',
+    'Add-TIConnectorFirmware'
 )
 
 # Cmdlets to export from this module

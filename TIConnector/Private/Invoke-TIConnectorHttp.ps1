@@ -3,10 +3,10 @@
 Sends an HTTP request to a TI-Connector endpoint.
 
 .DESCRIPTION
-Invokes an HTTP request with JSON content settings and validates the response
-against the expected HTTP status codes. The complete web response is returned
-when the request succeeds. If the request fails or returns an unexpected
-status code, the function throws an exception with the underlying error.
+Invokes an HTTP request with content settings and validates the response
+against the expected HTTP status codes. Supports both JSON payloads and 
+advanced content types (like MultipartFormDataContent for binary uploads).
+The complete web response is returned when the request succeeds.
 
 Certificate validation is skipped because TI-Connectors commonly use
 self-signed certificates. Use this helper only for trusted connector hosts.
@@ -22,8 +22,7 @@ Optional HTTP headers to include in the request. The default is an empty
 hashtable.
 
 .PARAMETER Body
-Optional request body. The request content type is set to
-application/json.
+Optional request body. Can be a string (JSON) or an HttpContent object.
 
 .PARAMETER ExpectedStatusCode
 One or more HTTP status codes that indicate a successful request. The
@@ -48,7 +47,7 @@ function Invoke-TIConnectorHttp {
         [Parameter(Mandatory)]
         [string] $Method,
         [hashtable] $Headers = @{},
-        [string] $Body,
+        [object] $Body,
         [int[]] $ExpectedStatusCode = @(200)
     )
 
@@ -57,11 +56,17 @@ function Invoke-TIConnectorHttp {
             Uri                  = $Uri
             Method               = $Method
             Headers              = $Headers
-            ContentType          = "application/json"
             SkipCertificateCheck = $true
             ErrorAction          = "Stop"
         }
-        if ($Body) { $params.Body = $Body }
+
+        if ($null -ne $Body) {
+            $params.Body = $Body
+
+            if ($Body -isnot [System.Net.Http.HttpContent]) {
+                $params.ContentType = "application/json"
+            }
+        }
 
         $response = Invoke-WebRequest @params
 

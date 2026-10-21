@@ -28,7 +28,7 @@ function Invoke-TIConnectorRequest {
         [Parameter(Mandatory = $true)]
         [string] $Request,
         [hashtable] $PathParameters = @{},
-        [string]$Body = $null
+        [object] $Body = $null
     )
 
     $vendor = Get-TIConnectorVendor -ComputerName $ComputerName

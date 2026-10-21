@@ -114,6 +114,61 @@ $script:ConnectorRequests = @{
                 Method             = "Put"
                 ExpectedStatusCode = 200
             }
+            ResetConnectorUpdateInfo              = @{
+                Path               = "rest/mgmt/ak/dienste/ksr"
+                Method             = "Delete"
+                ExpectedStatusCode = 200
+            }
+            InvokeConnectorUpdateCheck            = @{
+                Path               = "rest/mgmt/ak/dienste/ksr/informationen/update"
+                Method             = "Put"
+                ExpectedStatusCode = 200
+            }
+            GetConnectorUpdateSetting             = @{
+                Path               = "rest/mgmt/ak/dienste/ksr/einstellungen"
+                Method             = "Get"
+                ExpectedStatusCode = 200
+            }
+            SetConnectorUpdateSetting             = @{
+                Path               = "rest/mgmt/ak/dienste/ksr/einstellungen?strict=true"
+                Method             = "Put"
+                ExpectedStatusCode = 200
+            }
+            GetConnectorUpdateInformation         = @{
+                Path               = "rest/mgmt/ak/dienste/ksr/informationen/updates-konnektor"
+                Method             = "Get"
+                ExpectedStatusCode = 200
+            }
+            GetConnectorTerminalGroups            = @{
+                Path               = "rest/mgmt/ak/dienste/ksr/informationen/terminal-gruppen"
+                Method             = "Get"
+                ExpectedStatusCode = 200
+            }
+            GetConnectorTerminalUpdateInformation = @{
+                Path               = "rest/mgmt/ak/dienste/ksr/informationen/updates-terminal/{Vendor}/{Product}/{HwVersion}/{FwVersion}"
+                Method             = "Get"
+                ExpectedStatusCode = 200
+            }
+            AddConnectorTerminalUpdate            = @{
+                Path               = "rest/mgmt/ak/dienste/ksr/hochladen-terminal/{Vendor}/{Product}/{HwVersion}/{FwVersion}"
+                Method             = "Post"
+                ExpectedStatusCode = 200
+            }
+            AddConnectorTerminalFirmware          = @{
+                Path               = "rest/mgmt/ak/dienste/ksr/hochladen-terminal/firmware/{UpdateID}"
+                Method             = "Post"
+                ExpectedStatusCode = 200
+            }
+            AddConnectorUpdate                    = @{
+                Path               = "rest/mgmt/ak/dienste/ksr/hochladen"
+                Method             = "Post"
+                ExpectedStatusCode = 200
+            }
+            AddConnectorFirmware                  = @{
+                Path               = "rest/mgmt/ak/dienste/ksr/hochladen/firmware/{UpdateID}"
+                Method             = "Post"
+                ExpectedStatusCode = 200
+            }
         }
     }
 }
