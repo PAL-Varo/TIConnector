@@ -7,7 +7,7 @@
 RootModule = 'TIConnector.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.6.0'
+ModuleVersion = '1.6.1'
 
 # Supported PSEditions
 CompatiblePSEditions = @('Core')
@@ -86,7 +86,7 @@ PrivateData = @{
         LicenseUri = 'https://github.com/PAL-Varo/TIConnector/blob/main/LICENSE'
 
         # A URL to the main project website for this project.
-        ProjectUri = 'https://github.com/PAL-Varo'
+        ProjectUri = 'https://github.com/PAL-Varo/TIConnector'
 
         # ReleaseNotes of this module
         ReleaseNotes = 'Initial release.'
