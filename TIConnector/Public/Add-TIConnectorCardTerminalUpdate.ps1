@@ -13,9 +13,6 @@
 .PARAMETER Credential
     PSCredential object containing connector access credentials.
 
-.PARAMETER InputObject
-    Card terminal update object received from Get-TIConnectorCardTerminalUpdate through the pipeline.
-
 .PARAMETER Vendor
     Product vendor ID of the card terminal group (e.g., DECHY).
 
@@ -48,27 +45,28 @@
         Add-TIConnectorCardTerminalUpdate -TargetFwVersion "5.0.0" -ReleaseNotes "Manuelles Update auf 5.0.0" -PassThru
 #>
 function Add-TIConnectorCardTerminalUpdate {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High', DefaultParameterSetName = 'Direct')]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string] $ComputerName,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [PSCredential] $Credential,
 
-        [Parameter(ValueFromPipeline = $true, ParameterSetName = 'Pipeline')]
-        [psobject] $InputObject,
-
-        [Parameter(ParameterSetName = 'Direct')]
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Alias('ProductVendorId')]
         [string] $Vendor,
 
-        [Parameter(ParameterSetName = 'Direct')]
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Alias('ProductCode')]
         [string] $Product,
 
-        [Parameter(ParameterSetName = 'Direct')]
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Alias('HardwareVersion')]
         [string] $HwVersion,
 
-        [Parameter(ParameterSetName = 'Direct')]
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Alias('CurrentFirmwareVersion')]
         [string] $CurrentFwVersion,
 
         [Parameter(Mandatory = $true)]
@@ -89,12 +87,7 @@ function Add-TIConnectorCardTerminalUpdate {
     )
 
     process {
-        $targetVendor = if ($InputObject) { $InputObject.ProductVendorId } else { $Vendor }
-        $targetProduct = if ($InputObject) { $InputObject.ProductCode } else { $Product }
-        $targetHw = if ($InputObject) { $InputObject.HardwareVersion } else { $HwVersion }
-        $targetCurrentFw = if ($InputObject) { $InputObject.CurrentFirmwareVersion } else { $CurrentFwVersion }
-
-        if (-not ($targetVendor -and $targetProduct -and $targetHw -and $targetCurrentFw)) {
+        if (-not ($Vendor -and $Product -and $HwVersion -and $CurrentFwVersion)) {
             Write-Verbose "Terminal group identifiers not fully provided. Querying terminal groups on '$ComputerName'..."
             $terminalGroups = Invoke-TIConnectorRequest -ComputerName $ComputerName -Credential $Credential -Request GetConnectorTerminalGroups
 
@@ -110,11 +103,11 @@ function Add-TIConnectorCardTerminalUpdate {
             }
 
             if (@($terminalGroups).Count -eq 1) {
-                $targetVendor = $terminalGroups[0].productVendorId
-                $targetProduct = $terminalGroups[0].productCode
-                $targetHw = $terminalGroups[0].hwVersion
-                $targetCurrentFw = $terminalGroups[0].fwVersion
-                Write-Verbose "Auto-selected single terminal group: $targetVendor / $targetProduct / $targetHw / $targetCurrentFw"
+                $Vendor = $terminalGroups[0].productVendorId
+                $Product = $terminalGroups[0].productCode
+                $HwVersion = $terminalGroups[0].hwVersion
+                $CurrentFwVersion = $terminalGroups[0].fwVersion
+                Write-Verbose "Auto-selected single terminal group: $Vendor / $Product / $HwVersion / $CurrentFwVersion"
             }
             else {
                 $PSCmdlet.ThrowTerminatingError(
@@ -140,13 +133,13 @@ function Add-TIConnectorCardTerminalUpdate {
 
         $jsonBody = $payload | ConvertTo-Json -Depth 10
         $pathParams = @{
-            Vendor    = $targetVendor
-            Product   = $targetProduct
-            HwVersion = $targetHw
-            FwVersion = $targetCurrentFw
+            Vendor    = $Vendor
+            Product   = $Product
+            HwVersion = $HwVersion
+            FwVersion = $CurrentFwVersion
         }
 
-        $targetName = "Card terminal update for '$targetVendor/$targetProduct' ($targetHw -> $TargetFwVersion)"
+        $targetName = "Card terminal update for '$Vendor/$Product' ($HwVersion -> $TargetFwVersion)"
 
         if ($PSCmdlet.ShouldProcess($targetName, "Add card terminal update")) {
             try {
@@ -156,10 +149,20 @@ function Add-TIConnectorCardTerminalUpdate {
                     -Body $jsonBody
 
                 if ($PassThru) {
-                    if ($response.PSObject.Properties['data']) {
-                        return $response.data
+                    $output = if ($response.PSObject.Properties['data']) { $response.data } else { $response }
+                    
+                    if ($output -is [PSCustomObject]) {
+                        if (-not $output.PSObject.Properties['TargetFwVersion']) {
+                            $output | Add-Member -NotePropertyName 'TargetFwVersion' -NotePropertyValue $TargetFwVersion -Force
+                        }
+                        if (-not $output.PSObject.Properties['ComputerName']) {
+                            $output | Add-Member -NotePropertyName 'ComputerName' -NotePropertyValue $ComputerName -Force
+                        }
+                        if (-not $output.PSObject.Properties['Credential']) {
+                            $output | Add-Member -NotePropertyName 'Credential' -NotePropertyValue $Credential -Force
+                        }
                     }
-                    return $response
+                    return $output
                 }
             }
             catch {

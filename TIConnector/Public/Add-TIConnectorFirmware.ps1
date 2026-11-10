@@ -5,7 +5,7 @@
 .DESCRIPTION
     Uploads 'firmware.tar' (datei1) and 'firmware.sig' (datei2) via multipart/form-data 
     to the connector's firmware upload endpoint. Automatically resolves the update ID 
-    if not explicitly specified.
+    if not explicitly specified, supporting full pipeline integration.
 
 .PARAMETER ComputerName
     FQDN or IP address of the target connector.
@@ -15,51 +15,44 @@
 
 .PARAMETER UpdateId
     The unique update identifier. If omitted, the function attempts to resolve it automatically.
+    Aliases: Id, FirmwareUpdateId, updateId.
 
 .PARAMETER TargetFwVersion
     Target firmware version to match when auto-resolving the update ID.
+    Aliases: fwVersion, TargetFwVersion.
 
 .PARAMETER TarPath
     Path to the firmware tarball file (firmware.tar).
-    Aliases: Tar, Archive, Path
+    Aliases: Tar, Archive, Path.
 
 .PARAMETER SigPath
     Path to the signature file (firmware.sig).
-    Aliases: Sig, Signature
-
-.PARAMETER PassThru
-    Returns the response from the connector.
+    Aliases: Sig, Signature.
 
 .EXAMPLE
-    Add-TIConnectorFirmware -ComputerName "192.168.1.100" -Credential $cred `
-        -TargetFwVersion "6.1.4" -TarPath "C:\firmware\firmware.tar" -SigPath "C:\firmware\firmware.sig" -PassThru
+    Add-TIConnectorUpdate -ComputerName "192.168.1.100" -Credential $cred -FilePath "C:\firmware\UpdateInfo.xml" -PassThru |
+        Add-TIConnectorFirmware -TarPath "C:\firmware\firmware.tar" -SigPath "C:\firmware\firmware.sig" -PassThru
 #>
 function Add-TIConnectorFirmware {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string] $ComputerName,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [PSCredential] $Credential,
 
-        [Parameter()]
-        [Alias("Id", "FirmwareUpdateId")]
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
         [string] $UpdateId,
 
-        [Parameter()]
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
         [string] $TargetFwVersion,
 
-        [Parameter(Mandatory = $true)]
-        [Alias("Tar", "Archive", "Path")]
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipelineByPropertyName = $true)]
         [string] $TarPath,
 
-        [Parameter(Mandatory = $true)]
-        [Alias("Sig", "Signature")]
-        [string] $SigPath,
-
-        [Parameter()]
-        [switch] $PassThru
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [string] $SigPath
     )
 
     process {
@@ -90,9 +83,10 @@ function Add-TIConnectorFirmware {
                 Write-Verbose "Auto-resolved UpdateId: $UpdateId"
             }
             elseif (@($candidates).Count -gt 1) {
+                $foundDetails = ($candidates | ForEach-Object { "Version: $($_.fwVersion), ID: $($_.updateId)" }) -join "; "
                 $PSCmdlet.ThrowTerminatingError(
                     [System.Management.Automation.ErrorRecord]::new(
-                        [System.InvalidOperationException]::new("Multiple connector update entries match. Please specify -TargetFwVersion or -UpdateId."),
+                        [System.InvalidOperationException]::new("Multiple connector update entries match ($foundDetails). Please specify -TargetFwVersion or -UpdateId."),
                         "MultipleUpdatesAmbiguous",
                         [System.Management.Automation.ErrorCategory]::InvalidArgument,
                         $candidates
@@ -139,25 +133,18 @@ function Add-TIConnectorFirmware {
                     UpdateID = $UpdateId
                 }
 
-                $response = Invoke-TIConnectorRequest -ComputerName $ComputerName -Credential $Credential `
+                Invoke-TIConnectorRequest -ComputerName $ComputerName -Credential $Credential `
                     -Request AddConnectorFirmware `
                     -PathParameters $pathParams `
                     -Body $formContent
-
-                if ($PassThru) {
-                    if ($response.PSObject.Properties['data']) {
-                        return $response.data
-                    }
-                    return $response
-                }
             }
             catch {
                 $PSCmdlet.WriteError($_)
             }
             finally {
-                if ($tarStream) {$tarStream.Dispose() }
-                if ($sigStream) {$sigStream.Dispose() }
-                if ($formContent) {$formContent.Dispose() }
+                if ($tarStream) { $tarStream.Dispose() }
+                if ($sigStream) { $sigStream.Dispose() }
+                if ($formContent) { $formContent.Dispose() }
             }
         }
     }

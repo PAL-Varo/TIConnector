@@ -13,9 +13,6 @@
 .PARAMETER Credential
     PSCredential object containing connector access credentials.
 
-.PARAMETER InputObject
-    Card terminal update object received from Get-TIConnectorCardTerminalUpdate through the pipeline.
-
 .PARAMETER Vendor
     Product vendor ID (e.g., DECHY).
     Aliases: ProductVendorId.
@@ -30,13 +27,11 @@
 
 .PARAMETER TargetFwVersion
     Target firmware version to match. If omitted and only one pending update exists, it is selected automatically.
+    Aliases: fwVersion, TargetFwVersion.
 
 .PARAMETER FilePath
     Path to the firmware binary file (e.g., .bin).
     Aliases: Path, FullName.
-
-.PARAMETER PassThru
-    Returns the response from the connector.
 
 .EXAMPLE
     Get-TIConnectorCardTerminalUpdate -ComputerName "192.168.1.100" -Credential $cred |
@@ -45,14 +40,11 @@
 function Add-TIConnectorCardTerminalFirmware {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string] $ComputerName,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [PSCredential] $Credential,
-
-        [Parameter(ValueFromPipeline = $true)]
-        [psobject] $InputObject,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [Alias("ProductVendorId")]
@@ -66,15 +58,12 @@ function Add-TIConnectorCardTerminalFirmware {
         [Alias("HardwareVersion")]
         [string] $HwVersion,
 
-        [Parameter()]
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
         [string] $TargetFwVersion,
 
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipelineByPropertyName = $true)]
         [Alias("Path", "FullName")]
-        [string] $FilePath,
-
-        [Parameter()]
-        [switch] $PassThru
+        [string] $FilePath
     )
 
     process {
@@ -89,12 +78,8 @@ function Add-TIConnectorCardTerminalFirmware {
             )
         }
 
-        $targetVendor = if ($InputObject -and $InputObject.ProductVendorId) { $InputObject.ProductVendorId } else { $Vendor }
-        $targetProduct = if ($InputObject -and $InputObject.ProductCode) { $InputObject.ProductCode } else { $Product }
-        $targetHw = if ($InputObject -and $InputObject.HardwareVersion) { $InputObject.HardwareVersion } else { $HwVersion }
-
-        $updateDataList = if ($InputObject -and $InputObject.UpdateInformation) {
-            @($InputObject)
+        $updateDataList = if ($_.UpdateInformation) {
+            @($_)
         }
         else {
             Get-TIConnectorCardTerminalUpdate -ComputerName $ComputerName -Credential $Credential
@@ -113,9 +98,9 @@ function Add-TIConnectorCardTerminalFirmware {
 
         $candidateUpdates = @()
         foreach ($item in $updateDataList) {
-            if ($targetVendor -and $item.ProductVendorId -ne $targetVendor) { continue }
-            if ($targetProduct -and $item.ProductCode -ne $targetProduct) { continue }
-            if ($targetHw -and $item.HardwareVersion -ne $targetHw) { continue }
+            if ($Vendor -and $item.ProductVendorId -ne $Vendor) { continue }
+            if ($Product -and $item.ProductCode -ne $Product) { continue }
+            if ($HwVersion -and $item.HardwareVersion -ne $HwVersion) { continue }
 
             $infos = $item.UpdateInformation.cardTerminalUpdateInformation
             if ($infos) {
@@ -173,17 +158,10 @@ function Add-TIConnectorCardTerminalFirmware {
                     UpdateID = $resolvedUpdateId
                 }
 
-                $response = Invoke-TIConnectorRequest -ComputerName $ComputerName -Credential $Credential `
+                Invoke-TIConnectorRequest -ComputerName $ComputerName -Credential $Credential `
                     -Request AddConnectorTerminalFirmware `
                     -PathParameters $pathParams `
                     -Body $formContent
-
-                if ($PassThru) {
-                    if ($response.PSObject.Properties['data']) {
-                        return $response.data
-                    }
-                    return $response
-                }
             }
             catch {
                 $PSCmdlet.WriteError($_)

@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Uploads the UpdateInfo.xml file via multipart/form-data to the connector's 
-    firmware upload endpoint.
+    firmware upload endpoint. Supports pipeline context forwarding via -PassThru.
 
 .PARAMETER ComputerName
     FQDN or IP address of the target connector.
@@ -17,11 +17,12 @@
     Aliases: Path, FullName.
 
 .PARAMETER PassThru
-    Returns the response from the connector.
+    Returns the response from the connector, enriched with connection context.
 
 .EXAMPLE
     Add-TIConnectorUpdate -ComputerName "192.168.1.100" -Credential $cred `
-        -FilePath "C:\firmware\UpdateInfo.xml" -PassThru
+        -FilePath "C:\firmware\UpdateInfo.xml" -PassThru |
+        Add-TIConnectorFirmware -TarPath "C:\firmware\firmware.tar" -SigPath "C:\firmware\firmware.sig"
 #>
 function Add-TIConnectorUpdate {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
@@ -32,7 +33,7 @@ function Add-TIConnectorUpdate {
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [PSCredential] $Credential,
 
-        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipelineByPropertyName = $true)]
         [Alias("Path", "FullName")]
         [string] $FilePath,
 
@@ -72,10 +73,17 @@ function Add-TIConnectorUpdate {
                     -Body $formContent
 
                 if ($PassThru) {
-                    if ($response.PSObject.Properties['data']) {
-                        return $response.data
+                    $output = if ($response.PSObject.Properties['data']) { $response.data } else { $response }
+                    
+                    if ($output -is [PSCustomObject]) {
+                        if (-not $output.PSObject.Properties['ComputerName']) {
+                            $output | Add-Member -NotePropertyName 'ComputerName' -NotePropertyValue $ComputerName -Force
+                        }
+                        if (-not $output.PSObject.Properties['Credential']) {
+                            $output | Add-Member -NotePropertyName 'Credential' -NotePropertyValue $Credential -Force
+                        }
                     }
-                    return $response
+                    return $output
                 }
             }
             catch {
