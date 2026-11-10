@@ -86,7 +86,7 @@ PrivateData = @{
         LicenseUri = 'https://github.com/PAL-Varo/TIConnector/blob/main/LICENSE'
 
         # A URL to the main project website for this project.
-        ProjectUri = 'https://github.com/PAL-Varo'
+        ProjectUri = 'https://github.com/PAL-Varo/TIConnector'
 
         # ReleaseNotes of this module
         ReleaseNotes = 'Initial release.'
