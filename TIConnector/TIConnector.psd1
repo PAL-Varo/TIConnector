@@ -7,7 +7,7 @@
 RootModule = 'TIConnector.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.6.1'
+ModuleVersion = '1.7.0'
 
 # Supported PSEditions
 CompatiblePSEditions = @('Core')
@@ -50,6 +50,7 @@ FunctionsToExport = @(
     'Get-TIConnectorClientSystem',
     'Export-TIConnectorContext',
     'ConvertTo-TIConnectorContextCsv',
+    'Get-TIConnectorVersion',
     'Get-TIConnectorCard',
     'Get-TIConnectorLogSetting',
     'Set-TIConnectorLogSetting',

@@ -34,6 +34,11 @@ $script:ConnectorRequests = @{
                 Method             = "Get"
                 ExpectedStatusCode = 200
             }
+            GetConnectorVersion                   = @{
+                Path               = "rest/mgmt/ak/dienste/status/version"
+                Method             = "Get"
+                ExpectedStatusCode = 200
+            }
             RestartConnector                      = @{
                 Path               = "rest/mgmt/nk/system"
                 Method             = "Post"
